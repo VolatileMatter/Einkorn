@@ -77,5 +77,276 @@
     <a class="page-btn" href="discard-recipes.html">Next: Discard Recipes →</a>
   </div>
 </main>
+
+<script>
+/* ═══ RECIPE STEP TIMER ═══ */
+(function() {
+
+/* ── CSS ── */
+const css = `
+#recipe-timer {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 224px;
+  background: #1a120a;
+  border: 1px solid rgba(160,119,42,0.45);
+  color: #f5ead6;
+  font-family: 'Crimson Text', Georgia, serif;
+  z-index: 1000;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.6);
+}
+#recipe-timer.rt-hidden { display: none; }
+#rt-header {
+  background: rgba(160,119,42,0.12);
+  border-bottom: 1px solid rgba(160,119,42,0.28);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#rt-header-title {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(160,119,42,0.9);
+}
+#rt-close {
+  background: none; border: none; color: rgba(245,234,214,0.4);
+  font-size: 14px; cursor: pointer; padding: 0 2px; line-height: 1;
+}
+#rt-close:hover { color: #f5ead6; }
+#rt-stepnum {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(160,119,42,0.6);
+  text-align: center;
+  padding: 8px 12px 0;
+  text-transform: uppercase;
+}
+#rt-steptext {
+  font-size: 13px;
+  color: rgba(245,234,214,0.8);
+  padding: 5px 12px 10px;
+  line-height: 1.45;
+  min-height: 50px;
+  text-align: center;
+}
+#rt-display {
+  font-family: 'Cinzel', serif;
+  font-size: 38px;
+  font-weight: 900;
+  text-align: center;
+  padding: 2px 12px 6px;
+  color: #f5ead6;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+#rt-display.rt-running { color: #8ecf8e; }
+#rt-display.rt-done { color: #c4923a; }
+#rt-barwrap {
+  height: 3px;
+  background: rgba(160,119,42,0.15);
+  margin: 0 12px 10px;
+}
+#rt-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #a0772a, #c4923a);
+  width: 100%;
+  transition: width 0.95s linear;
+}
+#rt-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+.rt-btn {
+  background: rgba(160,119,42,0.15);
+  border: 1px solid rgba(160,119,42,0.35);
+  color: #f5ead6;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.rt-btn:hover { background: rgba(160,119,42,0.3); border-color: rgba(160,119,42,0.6); }
+.rt-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+#rt-ss {
+  background: rgba(160,119,42,0.22);
+  border-color: rgba(160,119,42,0.5);
+  padding: 6px 14px;
+  font-size: 12px;
+}
+#rt-ss.rt-running { background: rgba(180,60,30,0.25); border-color: rgba(180,60,30,0.5); }
+#rt-showbtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+  background: #1a120a;
+  border: 1px solid rgba(160,119,42,0.5);
+  color: #c4923a;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  display: none;
+}
+@media (max-width: 1080px) {
+  #recipe-timer { top: auto; bottom: 80px; right: 12px; width: 200px; }
+  #rt-showbtn { bottom: 20px; }
+}
+`;
+const styleEl = document.createElement('style');
+styleEl.textContent = css;
+document.head.appendChild(styleEl);
+
+/* ── DATA ── */
+const STEPS = [{"text": "Chill pastry dough in fridge", "seconds": 1800}, {"text": "Bake at 400°F until golden", "seconds": 1800}, {"text": "Cool before eating", "seconds": 600}];
+
+/* ── AUDIO ── */
+function ding() {
+  try {
+    const a = new (window.AudioContext || window.webkitAudioContext)();
+    [[880,0,0.5,0.4],[1108,0.15,0.5,0.3],[1320,0.3,0.8,0.22]].forEach(([f,s,d,v])=>{
+      const o=a.createOscillator(), g=a.createGain();
+      o.connect(g); g.connect(a.destination);
+      o.frequency.value=f; o.type='sine';
+      g.gain.setValueAtTime(v, a.currentTime+s);
+      g.gain.exponentialRampToValueAtTime(0.001, a.currentTime+s+d);
+      o.start(a.currentTime+s); o.stop(a.currentTime+s+d+0.05);
+    });
+  } catch(e){}
+}
+
+/* ── WAKE LOCK ── */
+let wl=null;
+async function acquireWL(){if('wakeLock' in navigator){try{wl=await navigator.wakeLock.request('screen');}catch(e){}}}
+function releaseWL(){if(wl){wl.release().catch(()=>{});wl=null;}}
+
+/* ── COOKIE ── */
+const CK='gotg_timer_'+location.pathname.replace(/[^a-z0-9]/gi,'_');
+function saveCK(d){const e=new Date(Date.now()+50*3600000).toUTCString();document.cookie=CK+'='+encodeURIComponent(JSON.stringify(d))+'; expires='+e+'; path=/; SameSite=Lax';}
+function loadCK(){const m=document.cookie.split('; ').find(r=>r.startsWith(CK+'='));if(!m)return null;try{return JSON.parse(decodeURIComponent(m.split('=').slice(1).join('=')));}catch(e){return null;}}
+
+/* ── STATE ── */
+let idx=0, rem=0, tot=0, running=false, iv=null;
+
+function fmt(s){
+  s=Math.max(0,s);
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
+  if(h>0) return h+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+  return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+}
+
+function render(){
+  if(!STEPS.length) return;
+  const st=STEPS[idx];
+  document.getElementById('rt-stepnum').textContent='Step '+(idx+1)+' of '+STEPS.length;
+  document.getElementById('rt-steptext').textContent=st.text;
+  const d=document.getElementById('rt-display');
+  if(st.seconds===0){d.textContent='—';d.className='';}
+  else{d.textContent=fmt(rem);d.className=running?'rt-running':(rem===0&&tot>0?'rt-done':'');}
+  document.getElementById('rt-bar').style.width=(tot>0?(rem/tot*100):100)+'%';
+  document.getElementById('rt-prev').disabled=(idx===0);
+  document.getElementById('rt-next').disabled=(idx===STEPS.length-1);
+  const ss=document.getElementById('rt-ss');
+  if(st.seconds===0){ss.disabled=true;ss.textContent='No timer';ss.className='rt-btn';}
+  else{ss.disabled=false;ss.textContent=running?'Pause':(rem>0&&rem<tot?'Resume':'Start');ss.className='rt-btn'+(running?' rt-running':'');}
+}
+
+function setStep(i,reset){
+  stopTimer();
+  idx=Math.min(Math.max(0,i),STEPS.length-1);
+  if(reset){rem=STEPS[idx].seconds;tot=rem;}
+  render();save();
+}
+
+function stopTimer(){running=false;clearInterval(iv);iv=null;releaseWL();}
+
+function startTimer(){
+  if(STEPS[idx].seconds===0)return;
+  if(rem<=0){rem=STEPS[idx].seconds;tot=rem;}
+  running=true;acquireWL();
+  iv=setInterval(()=>{
+    rem--;
+    if(rem<=0){rem=0;stopTimer();ding();render();
+      if(idx<STEPS.length-1)setTimeout(()=>{setStep(idx+1,true);},3200);
+    } else {render();}
+    save();
+  },1000);
+  render();save();
+}
+
+function toggleSS(){running?pauseTimer():startTimer();}
+function pauseTimer(){running=false;clearInterval(iv);iv=null;releaseWL();render();save();}
+
+function save(){saveCK({idx,rem,tot,ts:Date.now()});}
+
+function restore(){
+  const s=loadCK();
+  if(s&&s.idx<STEPS.length){
+    idx=s.idx;
+    const elapsed=Math.floor((Date.now()-s.ts)/1000);
+    rem=Math.max(0,(s.rem||0)-elapsed);
+    tot=s.tot||STEPS[idx].seconds||0;
+  } else {
+    rem=STEPS[idx]?.seconds||0;
+    tot=rem;
+  }
+  render();
+}
+
+/* ── BUILD UI ── */
+document.addEventListener('DOMContentLoaded',()=>{
+  const w=document.createElement('div');
+  w.id='recipe-timer';
+  w.innerHTML=`
+    <div id="rt-header">
+      <span id="rt-header-title">⏱ Step Timer</span>
+      <button id="rt-close" title="Close">✕</button>
+    </div>
+    <div id="rt-stepnum"></div>
+    <div id="rt-steptext"></div>
+    <div id="rt-display">--:--</div>
+    <div id="rt-barwrap"><div id="rt-bar"></div></div>
+    <div id="rt-controls">
+      <button class="rt-btn" id="rt-prev">◀</button>
+      <button class="rt-btn" id="rt-ss">Start</button>
+      <button class="rt-btn" id="rt-next">▶</button>
+    </div>`;
+  document.body.appendChild(w);
+
+  const showBtn=document.createElement('button');
+  showBtn.id='rt-showbtn';showBtn.textContent='⏱ TIMER';
+  document.body.appendChild(showBtn);
+
+  document.getElementById('rt-close').onclick=()=>{w.classList.add('rt-hidden');showBtn.style.display='block';stopTimer();};
+  showBtn.onclick=()=>{w.classList.remove('rt-hidden');showBtn.style.display='none';};
+  document.getElementById('rt-prev').onclick=()=>setStep(idx-1,true);
+  document.getElementById('rt-next').onclick=()=>setStep(idx+1,true);
+  document.getElementById('rt-ss').onclick=toggleSS;
+
+  if(!STEPS.length){
+    w.querySelector('#rt-controls').innerHTML='<span style="font-size:12px;color:rgba(245,234,214,0.4);padding:8px">No timed steps</span>';
+    document.getElementById('rt-barwrap').style.display='none';
+    document.getElementById('rt-display').style.display='none';
+  }
+
+  restore();
+});
+
+})();
+</script>
+
 </body>
 </html>
