@@ -371,9 +371,10 @@ ul.styled li::before { content: '✦'; position: absolute; left: 0; color: var(-
 }
 .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 
-/* ── GODDESS DROPDOWN NAV ── */
+/* ── NAV DROPDOWNS (shared styles) ── */
+.nav-dropdown { position: relative; display: inline-block; }
 .goddess-dropdown { position: relative; display: inline-block; }
-.goddess-dropdown-btn {
+.goddess-dropdown-btn, .nav-dropdown-btn {
   font-family: 'Cinzel', serif;
   font-size: 9px;
   letter-spacing: 0.2em;
@@ -387,12 +388,13 @@ ul.styled li::before { content: '✦'; position: absolute; left: 0; color: var(-
   cursor: pointer;
   line-height: inherit;
 }
-.goddess-dropdown-btn:hover, .goddess-dropdown-btn.active {
+.goddess-dropdown-btn:hover, .goddess-dropdown-btn.active,
+.nav-dropdown-btn:hover, .nav-dropdown-btn.active {
   color: var(--gold-bright);
   border-color: rgba(160,119,42,0.3);
   background: rgba(160,119,42,0.08);
 }
-.goddess-dropdown-menu {
+.goddess-dropdown-menu, .nav-dropdown-menu {
   display: none;
   position: absolute;
   top: 100%;
@@ -405,8 +407,10 @@ ul.styled li::before { content: '✦'; position: absolute; left: 0; color: var(-
   padding: 4px 0;
 }
 .goddess-dropdown:hover .goddess-dropdown-menu,
-.goddess-dropdown-menu:hover { display: block; }
-.goddess-dropdown-menu a {
+.goddess-dropdown-menu:hover,
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown-menu:hover { display: block; }
+.goddess-dropdown-menu a, .nav-dropdown-menu a {
   display: block;
   font-family: 'Cinzel', serif;
   font-size: 9px;
@@ -418,8 +422,9 @@ ul.styled li::before { content: '✦'; position: absolute; left: 0; color: var(-
   transition: all 0.2s;
   border-bottom: 1px solid rgba(160,119,42,0.1);
 }
-.goddess-dropdown-menu a:last-child { border-bottom: none; }
-.goddess-dropdown-menu a:hover, .goddess-dropdown-menu a.active {
+.goddess-dropdown-menu a:last-child, .nav-dropdown-menu a:last-child { border-bottom: none; }
+.goddess-dropdown-menu a:hover, .goddess-dropdown-menu a.active,
+.nav-dropdown-menu a:hover, .nav-dropdown-menu a.active {
   color: var(--gold-bright);
   background: rgba(160,119,42,0.1);
 }
