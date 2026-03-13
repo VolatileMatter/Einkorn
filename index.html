@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Guardian of the Grain</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* COVER-SPECIFIC STYLES */
+body { background: #1a120a; color: var(--parchment); }
+
+/* Noise overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 500; opacity: 0.6;
+}
+
+/* HERO */
+.cover-hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 60px 24px 40px;
+  position: relative;
+  background: radial-gradient(ellipse at 50% 35%, #3d2505 0%, #1a120a 70%);
+  overflow: hidden;
+}
+.cover-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 50%, rgba(160,119,42,0.07) 0%, transparent 70%);
+}
+.cover-border {
+  position: absolute; inset: 18px;
+  border: 1px solid rgba(160,119,42,0.22);
+  pointer-events: none;
+}
+.cover-border::before {
+  content: ''; position: absolute; inset: 7px;
+  border: 1px solid rgba(160,119,42,0.1);
+}
+
+.eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 10px; letter-spacing: 0.45em;
+  text-transform: uppercase; color: var(--gold);
+  opacity: 0.65; margin-bottom: 28px;
+  animation: fadeUp 1.2s ease both;
+}
+.cover-title {
+  font-family: 'Cinzel', serif; font-weight: 900;
+  font-size: clamp(44px, 8vw, 86px);
+  color: var(--parchment); line-height: 1.05;
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 40px rgba(160,119,42,0.35);
+  animation: fadeUp 1.2s 0.25s ease both;
+}
+.cover-rule {
+  width: 200px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 32px auto;
+  animation: fadeIn 1.5s 0.5s ease both;
+}
+.cover-subtitle {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  color: var(--gold-bright); font-size: clamp(17px, 2.5vw, 22px);
+  opacity: 0.88; margin-bottom: 20px;
+  animation: fadeUp 1.2s 0.6s ease both;
+}
+.cover-tagline {
+  font-family: 'Crimson Text', serif; font-style: italic;
+  color: rgba(245,234,214,0.55); font-size: 17px;
+  max-width: 460px; line-height: 1.7;
+  animation: fadeUp 1.2s 0.8s ease both;
+}
+
+/* BREAD CLOCK */
+.bread-clock {
+  margin-top: 48px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(160,119,42,0.3);
+  padding: 28px 36px;
+  max-width: 520px;
+  width: 100%;
+  animation: fadeUp 1.2s 1.1s ease both;
+}
+.clock-icon { font-size: 28px; margin-bottom: 10px; }
+.clock-title {
+  font-family: 'Cinzel', serif; font-size: 10px;
+  letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--gold); opacity: 0.6; margin-bottom: 14px;
+}
+.clock-message {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 20px; color: var(--parchment);
+  line-height: 1.5; margin-bottom: 12px;
+}
+.clock-sub {
+  font-family: 'Crimson Text', serif;
+  font-size: 15px; color: rgba(245,234,214,0.5);
+  line-height: 1.6;
+}
+
+/* TABLE OF CONTENTS */
+.toc-section {
+  width: 100%; max-width: 780px;
+  padding: 60px 24px;
+  margin: 0 auto;
+  animation: fadeUp 1.2s 1.4s ease both;
+}
+.toc-heading {
+  font-family: 'Cinzel', serif; font-size: 11px;
+  letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--gold); opacity: 0.55;
+  text-align: center; margin-bottom: 40px;
+}
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2px;
+}
+.toc-group { margin-bottom: 32px; }
+.toc-group-label {
+  font-family: 'Cinzel', serif; font-size: 9px;
+  letter-spacing: 0.4em; text-transform: uppercase;
+  color: rgba(160,119,42,0.5);
+  padding: 0 0 10px;
+  border-bottom: 1px solid rgba(160,119,42,0.15);
+  margin-bottom: 4px;
+}
+.toc-entry {
+  display: flex; align-items: baseline;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(160,119,42,0.08);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.toc-entry:hover .toc-entry-title { color: var(--gold-bright); }
+.toc-entry:hover .toc-entry-line { background: var(--gold); opacity: 0.4; }
+.toc-num {
+  font-family: 'Cinzel', serif; font-size: 9px;
+  letter-spacing: 0.15em; color: rgba(160,119,42,0.45);
+  flex-shrink: 0; width: 28px;
+}
+.toc-entry-title {
+  font-family: 'Crimson Text', serif; font-size: 17px;
+  color: rgba(245,234,214,0.7);
+  flex: 1; transition: color 0.2s;
+}
+.toc-entry-line {
+  flex: 1; height: 1px;
+  background: rgba(160,119,42,0.2);
+  transition: background 0.2s;
+}
+.toc-entry-sub {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 13px; color: rgba(160,119,42,0.45);
+  flex-shrink: 0;
+}
+
+/* FOOTER */
+.cover-footer {
+  padding: 40px 24px;
+  text-align: center;
+  border-top: 1px solid rgba(160,119,42,0.12);
+}
+.cover-footer p {
+  font-family: 'Cinzel', serif; font-size: 9px;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: rgba(160,119,42,0.3); margin: 0; text-align: center;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<section class="cover-hero">
+  <div class="cover-border"></div>
+  <div class="eyebrow">An Ancient Art — Restored</div>
+  <h1 class="cover-title">The Guardian<br>of the Grain</h1>
+  <div class="cover-rule"></div>
+  <p class="cover-subtitle">Ancient Wisdom, Ancient Bread</p>
+  <p class="cover-tagline">A guide for those who wish to feed their families well, following the forgotten paths of the women who came before.</p>
+
+  <!-- BREAD CLOCK -->
+  <div class="bread-clock">
+    <div class="clock-icon">🌾</div>
+    <div class="clock-title">The Baker's Hour</div>
+    <div class="clock-message" id="clock-message">Loading...</div>
+    <div class="clock-sub" id="clock-sub"></div>
+  </div>
+</section>
+
+<!-- TABLE OF CONTENTS -->
+<section class="toc-section">
+  <div class="toc-heading">Table of Contents</div>
+  <div class="toc-grid">
+
+    <!-- Prologue -->
+    <div class="toc-group">
+      <div class="toc-group-label">Prologue — The Story of Bread</div>
+      <a class="toc-entry" href="history-of-bread.html">
+        <span class="toc-num">I</span>
+        <span class="toc-entry-title">The History of Bread</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">14,000 years</span>
+      </a>
+      <a class="toc-entry" href="divine-feminine.html">
+        <span class="toc-num">II</span>
+        <span class="toc-entry-title">The Divine Feminine &amp; Grain</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Myth &amp; language</span>
+      </a>
+      <a class="toc-entry" href="hestia.html">
+        <span class="toc-num">III</span>
+        <span class="toc-entry-title">Hestia — Goddess of the Hearth</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">First &amp; last</span>
+      </a>
+      <a class="toc-entry" href="brigid.html">
+        <span class="toc-num">IV</span>
+        <span class="toc-entry-title">Brigid — Goddess of the Flame</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Imbolc &amp; the cross</span>
+      </a>
+    </div>
+
+    <!-- Understanding Einkorn -->
+    <div class="toc-group">
+      <div class="toc-group-label">The Ancient Grain</div>
+      <a class="toc-entry" href="history-of-einkorn.html">
+        <span class="toc-num">V</span>
+        <span class="toc-entry-title">History of Einkorn</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">The original wheat</span>
+      </a>
+      <a class="toc-entry" href="health-benefits-einkorn.html">
+        <span class="toc-num">VI</span>
+        <span class="toc-entry-title">Health Benefits of Einkorn</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Nutrition &amp; healing</span>
+      </a>
+      <a class="toc-entry" href="fats-nutrition.html">
+        <span class="toc-num">VII</span>
+        <span class="toc-entry-title">Fats &amp; Nutrition</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Which fat, and why</span>
+      </a>
+      <a class="toc-entry" href="working-with-einkorn.html">
+        <span class="toc-num">VIII</span>
+        <span class="toc-entry-title">Working with Einkorn Dough</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Technique &amp; feel</span>
+      </a>
+    </div>
+
+    <!-- The Living Culture -->
+    <div class="toc-group">
+      <div class="toc-group-label">The Living Culture</div>
+      <a class="toc-entry" href="sourdough-starter.html">
+        <span class="toc-num">IX</span>
+        <span class="toc-entry-title">Creating Your Sourdough Starter</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Day-by-day guide</span>
+      </a>
+      <a class="toc-entry" href="starter-care.html">
+        <span class="toc-num">X</span>
+        <span class="toc-entry-title">Starter Care &amp; Maintenance</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Keeping it alive</span>
+      </a>
+    </div>
+
+    <!-- Recipes -->
+    <div class="toc-group">
+      <div class="toc-group-label">The Recipes</div>
+      <a class="toc-entry" href="recipe-everyday-loaf.html">
+        <span class="toc-num">XI</span>
+        <span class="toc-entry-title">The Everyday Sourdough Loaf</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">The anchor recipe</span>
+      </a>
+      <a class="toc-entry" href="recipe-flatbread.html">
+        <span class="toc-num">XII</span>
+        <span class="toc-entry-title">Rustic Pilgrim Flatbread</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">14,000 year old recipe</span>
+      </a>
+      <a class="toc-entry" href="recipe-dinner-rolls.html">
+        <span class="toc-num">XIII</span>
+        <span class="toc-entry-title">Honey Einkorn Dinner Rolls</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Soft &amp; golden</span>
+      </a>
+      <a class="toc-entry" href="recipe-beer-bread.html">
+        <span class="toc-num">XIV</span>
+        <span class="toc-entry-title">Ancient Ale Bread</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">The medieval barm tradition</span>
+      </a>
+      <a class="toc-entry" href="recipe-hand-pies.html">
+        <span class="toc-num">XV</span>
+        <span class="toc-entry-title">Einkorn Hand Pies &amp; Empanadas</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Medieval &amp; Iberian traditions</span>
+      </a>
+      <a class="toc-entry" href="discard-recipes.html">
+        <span class="toc-num">XVI</span>
+        <span class="toc-entry-title">Discard Recipes</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">Crackers, cornbread &amp; more</span>
+      </a>
+    </div>
+
+    <!-- Reference -->
+    <div class="toc-group">
+      <div class="toc-group-label">Reference</div>
+      <a class="toc-entry" href="troubleshooting.html">
+        <span class="toc-num">XVII</span>
+        <span class="toc-entry-title">Troubleshooting</span>
+        <span class="toc-entry-line"></span>
+        <span class="toc-entry-sub">What went wrong &amp; why</span>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<footer class="cover-footer">
+  <p>The Guardian of the Grain · Ancient Wisdom, Ancient Bread</p>
+</footer>
+
+<script>
+// ═══ BREAD CLOCK ═══
+const messages = {
+  // [message, sub-text, icon]
+  5:  ["Dawn — wake the starter.", "Pull your starter from the fridge and give it a feeding now. It will be ready to bake with in 6–8 hours.", "🌅"],
+  6:  ["Morning flour-time.", "If your starter is active from last night's feeding, this is a good time to mix your autolyse and begin a new loaf.", "🌾"],
+  7:  ["The autolyse hour.", "Mix your flour and water and leave to rest. Do nothing else. The gluten is forming without effort.", "🫙"],
+  8:  ["Add your starter.", "After your 45-minute autolyse, add your active starter and salt. Begin the first stretch-and-fold.", "🤲"],
+  9:  ["First stretch-and-fold.", "Time for a round of stretch-and-fold. Wet your hands. Four sides, then rest 20 minutes.", "🔄"],
+  10: ["Second stretch-and-fold.", "The dough should feel more cohesive today. Do another round. Notice how it has changed.", "🔄"],
+  11: ["Third fold, then rest.", "One more round, then cover and leave the dough to ferment undisturbed. Go about your day.", "🫶"],
+  12: ["Midday — the dough is rising.", "Bulk fermentation is underway. Leave it alone. Check back in a few hours for bubbles and growth.", "🌤️"],
+  13: ["The slow miracle is happening.", "Your dough is fermenting. The bacteria are working. The phytic acid is breaking down. Patience.", "⏳"],
+  14: ["Check your bulk.", "Gently touch your dough. Does it feel puffy? Are there bubbles at the surface? Good. Keep waiting.", "🧐"],
+  15: ["Check your starter too.", "If you have not done so today, check your starter jar. It should be fed or refrigerated.", "🫙"],
+  16: ["Late afternoon — shaping time.", "If your dough has grown 75% and feels bubbly and light, it may be time to shape and cold-proof overnight.", "🌾"],
+  17: ["Shape and refrigerate.", "Time to give your dough its final shape, place it in the proofing basket, and put it in the fridge for an overnight proof.", "❄️"],
+  18: ["The oven rests. You rest.", "Your dough is in the fridge. Tomorrow you will bake. For now, feed your starter and put it away.", "🌙"],
+  19: ["Evening — tend the starter.", "Before bed, give your starter one last feeding if it is active on the counter, then store it in the fridge.", "🌙"],
+  20: ["Night — dough sleeps, you sleep.", "Your dough is slowly fermenting in the cold. The longer it rests, the more flavour it develops. All is well.", "✨"],
+  21: ["The starter and the dough rest.", "Cold fermentation is the most patient magic. Check everything is covered and sleep well.", "🌙"],
+  22: ["Late night check.", "Is your overnight bread in the fridge? Good. Feed your starter if it needs it. Sleep now.", "🌙"],
+  23: ["Rest now.", "The grain is resting. So should you. Tomorrow you will bake.", "🌙"],
+  0:  ["Before dawn.", "Sleep, guardian. The bread will be ready in the morning.", "🌙"],
+  1:  ["The small hours.", "The slow fermentation continues without you. Sleep.", "🌙"],
+  2:  ["Deep in the night.", "The bacteria work while you rest. This is the oldest magic.", "🌙"],
+  3:  ["Before first light.", "In a few hours you will preheat the oven. Not yet.", "🌙"],
+  4:  ["Almost dawn.", "If you are an early riser: preheat your Dutch oven now. Baking time is near.", "🌅"],
+};
+
+function updateClock() {
+  const h = new Date().getHours();
+  const [msg, sub, icon] = messages[h] || ["Tend your starter today.", "A well-fed starter is the foundation of all good bread.", "🌾"];
+  document.getElementById('clock-message').textContent = msg;
+  document.getElementById('clock-sub').textContent = sub;
+  document.querySelector('.clock-icon').textContent = icon;
+}
+updateClock();
+setInterval(updateClock, 60000);
+</script>
+</body>
+</html>
