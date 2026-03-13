@@ -282,11 +282,14 @@ tbody td:first-child { color: var(--ink); font-weight: 600; }
   margin-top: 8px;
 }
 .ingredients-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
+  display: block;
   margin: 24px 0;
   border: 1px solid var(--parchment-deep);
+  border-bottom: none;
+}
+.ing-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 .ing-row .ing-name,
 .ing-row .ing-amount { padding: 8px 14px; border-bottom: 1px solid var(--parchment-deep); font-size: 16px; color: var(--ink-light); }
@@ -433,7 +436,7 @@ ul.styled li::before { content: '✦'; position: absolute; left: 0; color: var(-
 @media (max-width: 680px) {
   .page-wrap { padding: 40px 20px 80px; }
   .recipe-banner { margin: 0 -20px 32px; }
-  .ingredients-grid { grid-template-columns: 1fr; }
+  .ing-row { grid-template-columns: 1fr; }
   .ing-row .ing-name { border-right: none; }
   .header-nav { display: none; }
   .fat-grid { grid-template-columns: 1fr; }
